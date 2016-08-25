@@ -86,7 +86,7 @@ static uint8_t* Sending_buf;
 static uint16_t Sending_length;
 static uint16_t Sending_sent_offset;
 
-#ifdef FREEBSD
+#ifndef FREEBSD
 static clock_t Sending_Start_Time;
 
 #ifndef TIMER_MS_INTERVALS
@@ -146,7 +146,7 @@ uint8_t setSendIPpacket(uint8_t* buf, uint16_t len)
     IPv6_length = len;
     IPv6_buf = buf; //memcpy(IPv6_buf,buf,len);
     RESET_SEND;
-#ifdef FREEBSD
+#ifndef FREEBSD
     RESET_TIMER(Sending_Start_Time);
 #endif
     return 1;
@@ -155,7 +155,7 @@ uint8_t setSendIPpacket(uint8_t* buf, uint16_t len)
 uint8_t LoWPAN_nextFrag(uint8_t* resFragBuf, uint8_t* resFragLen);
 uint8_t LoWPAN_nextFrag(uint8_t* resFragBuf, uint8_t* resFragLen)
 {
-#ifdef FREEBSD
+#ifndef FREEBSD
     if((*resFragLen) <= 5 || (*resFragLen) > MAX_FRAG_SIZE || ELAPSED_TIMER(Sending_Start_Time))
 		return 2;	//2 for error
 #endif
@@ -287,7 +287,7 @@ typedef struct
                                         (_BUF).size = 0;            \
                                         (_BUF).tag = _TAG;          \
                                     }while(0)
-#ifdef FREEBSD
+#ifndef FREEBSD
 #define RA_BUFFER_DEALLOC(_BUF) do{                             \
                                     (_BUF).inUse = FALSE;       \
                                     (_BUF).ra_size = 0;         \
@@ -367,7 +367,7 @@ LoWPAN_RA_info* getRAbuffer(uint16_t tag)
     {
         if(buffers_stack[i].inUse)
         {
-#ifdef FREEBSD        
+#ifndef FREEBSD        
             if(ELAPSED_TIMER(buffers_stack[i].timer))
             {
                 RA_BUFFER_DEALLOC(buffers_stack[i]);
