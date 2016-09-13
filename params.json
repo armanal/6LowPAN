@@ -1,0 +1,6 @@
+{
+  "name": "6lowpan",
+  "tagline": "An implementation of 6LowPAN protocol, compatible with Contiki OS.",
+  "body": "### Usage\r\n  This guide will help you simply run a 6lowpan stack on your IOT device or any other software project.    \r\n  explanations are separated by header files. i have included any header file that i felt it need to be explained.\r\n\r\n## glue.h Insides:\r\n  include glue.h, so entire library will be available in your project. \r\n",
+  "note": "Don't delete this file! It's used internally to help with page regeneration."
+}
