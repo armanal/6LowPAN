@@ -164,7 +164,12 @@
 #define NHC_UDP_10	0xf2
 #define NHC_UDP_11	0xf3
 
-
+///compresses IPv6 packet with IPHC compression method
+///args:: ipbuf: original IPv6 buffer
+///       ipsize: size of IPv6 packet
+///       resbuf: pointer to buffer for compressed packet
+///       ressize: pointer to uint16_t for size of compressed packet
+///NOTE: we don't support context based IP address Compression
 void IPHC06Compression(uint8_t* ipbuf, uint16_t ipsize, uint8_t* resbuf, uint16_t* ressize);
 void IPHC06Compression(uint8_t* ipbuf, uint16_t ipsize, uint8_t* resbuf, uint16_t* ressize)
 {
@@ -409,6 +414,12 @@ void IPHC06Compression(uint8_t* ipbuf, uint16_t ipsize, uint8_t* resbuf, uint16_
 
 }
 
+///this is the opposite of IPHC06Compression
+///args:: buf: compressed packet buffer
+///       bsize: size of compressed packet
+///       resbuf: pointer to the buffer for uncompressed packet
+///       rsize: pointer to uint16_t for size of uncompressed packet
+///NOTE: we don't support context based IP address Decompression
 void IPHC06Decompression(uint8_t* buf, uint16_t bsize, uint8_t* resbuf, uint16_t* rsize);
 void IPHC06Decompression(uint8_t* buf, uint16_t bsize, uint8_t* resbuf, uint16_t* rsize)
 {
@@ -661,6 +672,7 @@ void IPHC06Decompression(uint8_t* buf, uint16_t bsize, uint8_t* resbuf, uint16_t
 /////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////
 
+//compression mode types
 typedef enum compressionMode
 {
 	IPHC06 = 0,
@@ -668,6 +680,7 @@ typedef enum compressionMode
 	NOCOMPRESSION = 2
 } compressionMode;
 
+//changing this global variable will cause switching betweeen compression methods
 compressionMode comMode;
 
 void init_lowPANcompression(void);
@@ -680,6 +693,11 @@ void finalize_lowPANcompression()
 {
 }
 
+///the handel function for user! you should call this function from outside
+///args:: ipbuf: original IPv6 buffer
+///       ipsize: size of IPv6 packet
+///       resbuf: pointer to buffer for compressed packet
+///       ressize: pointer to uint16_t for size of compressed packet
 void compress(uint8_t* ipbuf, uint16_t ipsize, uint8_t* resbuf, uint16_t* ressize);
 void compress(uint8_t* ipbuf, uint16_t ipsize, uint8_t* resbuf, uint16_t* ressize)
 {
@@ -706,6 +724,11 @@ void compress(uint8_t* ipbuf, uint16_t ipsize, uint8_t* resbuf, uint16_t* ressiz
 	}
 }
 
+///opposite of compress function
+///args:: buf: compressed packet buffer
+///       bsize: size of compressed packet
+///       resbuf: pointer to the buffer for uncompressed packet
+///       rsize: pointer to uint16_t for size of uncompressed packet
 void uncompress(uint8_t* buf, uint16_t bsize, uint8_t* resbuf, uint16_t* rsize);
 void uncompress(uint8_t* buf, uint16_t bsize, uint8_t* resbuf, uint16_t* rsize)
 {

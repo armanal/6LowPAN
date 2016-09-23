@@ -154,6 +154,9 @@ typedef struct {
 ///////////////////////////////////////////////////////////////
 ///   Functions implementations ///////////////////////////////
 
+
+///take's MAC_Frame_t struct and calculates MAC header length
+///arg:: f: MAC_Frame_t struct filled with valid data
 uint8_t MACgethdrLen(MAC_Frame_t f);
 uint8_t MACgethdrLen(MAC_Frame_t f)
 {
@@ -192,6 +195,9 @@ uint8_t MACgethdrLen(MAC_Frame_t f)
 	return l;
 }
 
+
+///take's MAC_Frame_t struct and according to MAC header length calculates MAC payload length
+///arg:: f: MAC_Frame_t struct filled with valid data
 uint8_t MACgetPayloadLength(MAC_Frame_t f);
 uint8_t MACgetPayloadLength(MAC_Frame_t f)
 {
@@ -199,8 +205,8 @@ uint8_t MACgetPayloadLength(MAC_Frame_t f)
 }
 
 
-///take's 16bits FCF field and extracts it's data inti a MAC_FCF_t struct
-///this struct should be provided before, function takes a pointer only
+///take's 16bits FCF field and extracts it's data into a MAC_FCF_t struct
+///this struct should be provided before, function just get a pointer
 ///args:: FCF_field: 2B FCF field of MAC frame
 void MACfcfparser(uint16_t FCF_field, MAC_FCF_t* FCF_result);
 void MACfcfparser(uint16_t FCF_field, MAC_FCF_t* FCF_result)
@@ -480,10 +486,18 @@ void MACframecreate(MAC_Frame_t* frame, uint8_t* buffer, uint8_t* len)
 /////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////
+/* ----------------------------------------------------------------
+	User space: global variables and handler macro/function 
+	definition
+   ---------------------------------------------------------------- */
 
+//Output MAC frame Info holder
 MAC_Frame_t FrameOut;
+//Input MAC frame Info holder
 MAC_Frame_t FrameIn;
 
+///initializes MAC layer with default values. takes no arguments
+///these values could be changed obviously, by macro's defined
 void init_framer(void);
 void init_framer()
 {
@@ -526,44 +540,74 @@ void init_framer()
 }
 
 
+///takes pointer to output buffer and pointer to it's size
+///args:: _buffer: pointer to output buffer, generated frame will be placed here
+///       _len: pointer to the variable containing maximum size of frame that is expected from MAC layer
+///             after execution this will contain actual size of generated frame
 #define framerOut802154(_buffer, _len) ({ FrameOut.FCF.RSVD = 0;																\
 									   FrameOut.SequenceNumber = (FrameOut.SequenceNumber % 254) + 1;						\
 									   if(FrameOut.DestPANID == FrameOut.SrcPANID) FrameOut.FCF.PanIDCompression = TRUE;	\
 									   else FrameOut.FCF.PanIDCompression = FALSE;											\
 									   MACframecreate(&FrameOut, _buffer, _len); })
+//frame type can be determined by calling ecah of these macros respectively
 #define asBeaconFrame802154 ({FrameOut.FCF.FrameType = BEACON;})
 #define asDataFrame802154 ({FrameOut.FCF.FrameType = DATA;})
 #define asAcknowledgementFrame802154 ({FrameOut.FCF.FrameType = ACKNOWLEDGEMENT;})
 #define asCommandFrame802154 ({FrameOut.FCF.FrameType = MAC_COMMAND;})
+//frame pending state can be detemined by calling these macros respectively
 #define framePending802154 ({ FrameOut.FCF.FramePend = TRUE; })
 #define NoFramePending802154 ({ FrameOut.FCF.FramePend = FALSE; })
+//ACK request state can be detemined by calling these macros respectively
 #define AckRequest802154 ({FrameOut.FCF.AckRequset = TRUE;})
 #define NoAckRequest802154 ({FrameOut.FCF.AckRequset = FALSE;})
+///take's pointer to 64byte memory containing address. it can be short address peaded with zero's
+///arg's:: _addr: pointer(uint8_t*) to 64byte address array
 #define setSrcAddr802154(_addr) (MAC_SET_ADDRESS(FrameOut.SrcAddr, _addr, 8))
 #define setDestAddr802154(_addr) (MAC_SET_ADDRESS(FrameOut.DestAddr, _addr, 8))
+//addresses are accessible with these macros
 #define srcAddr802154 (FrameOut.SrcAddr)
 #define destAddr802154 (FrameOut.DestAddr)
+///sets PAN ID's given by 16bit uint16_t variable _ID
+///arg's:: _ID: uint16_t PAN ID
 #define srcPanID(_ID) (FrameOut.SrcPANID = _ID)
 #define destPanID(_ID) (FrameOut.DestPANID = _ID)
+//with this macro you can access maximum payload length available for MAC layer
 #define maxPayload802154 (MACgetPayloadLength(FrameOut))
+//access output frame payload
 #define data802154 (FrameOut.Payload)
+//access output frame payload length
 #define dataLen802154 (FrameOut.length)
 
+
+///takes pointer input frame and it's length
+///args:: _buffer: pointer(uint8_t*) to received frame
+///       _len: lenght of received frame with type of uint8_t
 #define framerIn802154(_buffer, _len) ({ MACframeparser(_buffer, _len, &FrameIn); })
-//last input frame
+/////last input frame/////////
+//frame type can be determined by calling ecah of these macros respectively
 #define lifIsBeaconFrame802154 (FrameIn.FCF.FrameType == BEACON)
 #define lifIsDataFrame802154 (FrameIn.FCF.FrameType == DATA)
 #define lifIsAcknowledgementFrame802154 (FrameIn.FCF.FrameType == ACKNOWLEDGEMENT)
 #define lifIsCommandFrame802154 (FrameIn.FCF.FrameType == MAC_COMMAND)
+//frame pending state can be detemined by calling this macro
 #define lifframePending802154 (FrameIn.FCF.FramePend == TRUE)
+//ACK request state can be detemined by calling these macros
 #define lifAckRequest802154 (FrameIn.FCF.AckRequset == TRUE)
 #define lifNoAckRequest802154 ({FrameOut.FCF.AckRequset == FALSE)
+//addresses are accessible with these macros
 #define lifSrcAddr802154 (FrameIn.SrcAddr)
 #define lifDestAddr802154 (FrameIn.DestAddr)
+//PAN IDs are accessible by these macros respectively
 #define lifsrcPanID (FrameIn.SrcPANID)
 #define lifdestPanID (FrameOut.DestPANID)
+//with this macro you can access maximum payload length available for received frame
 #define lifmaxPayload802154 (MACgetPayloadLength(FrameIn))
+//access input frame payload
 #define lifdata802154 (FrameIn.Payload)
+//access input frame payload length
 #define lifdataLen802154 (FrameIn.length)
+
+//////////////// End of handler macros/functions ////////////////////////
+/////////////////////////////////////////////////////////////////////////
 
 #endif
