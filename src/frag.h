@@ -248,8 +248,9 @@ typedef struct
 	//if this buffer is in use it should set to true
 	//and free buffer by setting it to false
 	bool_t inUse;
-
-    //clock_t timer;
+#ifndef FREEBSD
+    clock_t timer;
+#endif // FREEBSD
 	//11-bit entier IP packet length before fragmentation
 	uint16_t size;
 	//reassembled size
