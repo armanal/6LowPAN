@@ -169,7 +169,7 @@
 ///       ipsize: size of IPv6 packet
 ///       resbuf: pointer to buffer for compressed packet
 ///       ressize: pointer to uint16_t for size of compressed packet
-///NOTE: we don't support context based IP address Compression
+///NOTE: context based IP address Compression is not supported
 void IPHC06Compression(uint8_t* ipbuf, uint16_t ipsize, uint8_t* resbuf, uint16_t* ressize);
 void IPHC06Compression(uint8_t* ipbuf, uint16_t ipsize, uint8_t* resbuf, uint16_t* ressize)
 {
@@ -261,7 +261,7 @@ void IPHC06Compression(uint8_t* ipbuf, uint16_t ipsize, uint8_t* resbuf, uint16_
 		IPHC_SET_SAC(iphc, 1);
 		IPHC_SET_SAM(iphc, 0);
 	}
-	//else if(){//contexts not supported in this version}
+	//else if(){//contexts are not supported in this version}
 	else if( IPV6_ADDR_UNICAST_LINK_LOCAL(IPV6_GET_SRC_ADDR_PTR(ipbuf)) &&
 			 IPV6_ADDR_UNICAST_DEST_CONDISION(IPV6_GET_DEST_ADDR_PTR(ipbuf)) )
 	{
@@ -328,7 +328,7 @@ void IPHC06Compression(uint8_t* ipbuf, uint16_t ipsize, uint8_t* resbuf, uint16_
 	}
 	else //if addr is not multicast
 	{
-		//if(//context not supported in this version) else
+		//if(//context are not supported in this version) else
 		if(IPV6_ADDR_UNICAST_LINK_LOCAL(IPV6_GET_DEST_ADDR_PTR(ipbuf)) &&
 			IPV6_ADDR_UNICAST_DEST_CONDISION(IPV6_GET_DEST_ADDR_PTR(ipbuf)) )
 		{
@@ -414,12 +414,12 @@ void IPHC06Compression(uint8_t* ipbuf, uint16_t ipsize, uint8_t* resbuf, uint16_
 
 }
 
-///this is the opposite of IPHC06Compression
+///this is the opposite of IPHC06 Compression
 ///args:: buf: compressed packet buffer
 ///       bsize: size of compressed packet
 ///       resbuf: pointer to the buffer for uncompressed packet
 ///       rsize: pointer to uint16_t for size of uncompressed packet
-///NOTE: we don't support context based IP address Decompression
+///NOTE: context based IP address Decompression is not supported
 void IPHC06Decompression(uint8_t* buf, uint16_t bsize, uint8_t* resbuf, uint16_t* rsize);
 void IPHC06Decompression(uint8_t* buf, uint16_t bsize, uint8_t* resbuf, uint16_t* rsize)
 {
@@ -433,7 +433,7 @@ void IPHC06Decompression(uint8_t* buf, uint16_t bsize, uint8_t* resbuf, uint16_t
 	(*rsize) = 0;
 
 	if(IPHC_GET_CID(iphc))
-		return; //we don't support context yet
+		return; //Contexts are not supported yet
 
 	IPV6_SET_VERSION(resbuf, 6);
 	if(IPHC_GET_TF(iphc) == IPHC_TF_ELIDED) //elided
@@ -448,7 +448,7 @@ void IPHC06Decompression(uint8_t* buf, uint16_t bsize, uint8_t* resbuf, uint16_t
 
 		r += 3;
 	}
-	else if(IPHC_GET_TF(iphc) == IPHC_TF_ECD_DSCP) //traffc class inline
+	else if(IPHC_GET_TF(iphc) == IPHC_TF_ECD_DSCP) //traffic class inline
 	{
 		temp = (*r);
 		temp = (((temp & 0xc0) >> 6) | ((temp & 0x3f) << 2));
@@ -501,7 +501,7 @@ void IPHC06Decompression(uint8_t* buf, uint16_t bsize, uint8_t* resbuf, uint16_t
 		// ip is unspecified
 		memset(IPV6_GET_SRC_ADDR_PTR(resbuf), 0, 16);
 	}
-	//else if(){//contexts not supported in this version}
+	//else if(){//contexts are not supported in this version}
 	else if(IPHC_GET_SAC(iphc) == 0)
 	{
 		(IPV6_GET_SRC_ADDR_PTR(resbuf))[0] = 0xfe; //link local
@@ -578,7 +578,7 @@ void IPHC06Decompression(uint8_t* buf, uint16_t bsize, uint8_t* resbuf, uint16_t
 		(IPV6_GET_DEST_ADDR_PTR(resbuf))[1] = 0x80;
 		memset(IPV6_GET_DEST_ADDR_PTR(resbuf) + 2, 0, 14); //zero padding
 
-		//if(//context not supported in this version) else
+		//if(//context is not supported in this version) else
 		if(IPHC_GET_DAC(iphc) == 0)
 		{
 			if(IPHC_GET_DAM(iphc) == IPHC_DAM_0)
@@ -646,7 +646,7 @@ void IPHC06Decompression(uint8_t* buf, uint16_t bsize, uint8_t* resbuf, uint16_t
 			}
 
 			if(temp)
-				return; //we don't compress checksum
+				return; //we don't compress the checksum
 
 			IPV6_UDP_SET_CHECKSUM(resbuf, GET16(r, 0));
 			r += 2;
@@ -693,7 +693,7 @@ void finalize_lowPANcompression()
 {
 }
 
-///the handel function for user! you should call this function from outside
+///the handle function for user! you should call this function from outside
 ///args:: ipbuf: original IPv6 buffer
 ///       ipsize: size of IPv6 packet
 ///       resbuf: pointer to buffer for compressed packet
@@ -705,7 +705,7 @@ void compress(uint8_t* ipbuf, uint16_t ipsize, uint8_t* resbuf, uint16_t* ressiz
 	{
 		case NOCOMPRESSION:
 		{
-		    resbuf[0] = 0x41; //set not compressed ipv6 dispatch
+		    resbuf[0] = 0x41; //setting the dispatch of uncompressed IPv6
             memcpy(&resbuf[1], ipbuf, ipsize);
             (*ressize) = ipsize + 1;
 		}break;
@@ -736,7 +736,7 @@ void uncompress(uint8_t* buf, uint16_t bsize, uint8_t* resbuf, uint16_t* rsize)
 	{
 		case NOCOMPRESSION:
 		{
-            if(buf[0] == 0x41)  //if it is ipv6 packet
+            if(buf[0] == 0x41)  //if it is a ipv6 packet
             {
                 *rsize = bsize - 1;
                 memcpy(resbuf, &buf[1], (*rsize));
