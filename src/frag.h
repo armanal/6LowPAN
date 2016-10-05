@@ -80,7 +80,7 @@ static uint8_t* IPv6_buf;
 static uint16_t IPv6_length;
 
 //last sent packet tag: increment with macro for current packet
-//Note: do not use this directly but only through GET_PACKET_TAG macro
+//Note:only use it through the GET_PACKET_TAG macro, not directly
 static uint16_t Sending_Packet_TAG;
 static uint8_t* Sending_buf;
 static uint16_t Sending_length;
@@ -102,7 +102,7 @@ static clock_t Sending_Start_Time;
                              })
 #endif
 
-///Packet Tag Incrementation for assigning to current packet
+///Packet Tag Incrementation to assign the current packet
 #define GET_NEXT_PACKET_TAG (Sending_Packet_TAG == UINT16_MAX ? Sending_Packet_TAG = 0 : ++Sending_Packet_TAG)
 #define GET_PACKET_TAG (Sending_Packet_TAG)
 
@@ -122,7 +122,7 @@ static clock_t Sending_Start_Time;
 ///arg:: _PTR: pointer to frag buffer
 #define SET_DATAGRAM_TAG(_PTR) SET16(_PTR, 2, GET_PACKET_TAG)
 
-///set's the offset of frag from begining of original IP paket
+///sets the offset of frag from the beginning of the original IP packet
 ///for more detailes see: rfc 4944
 ///args:: _PTR: pointer to frag buffer
 ///       _OFFSET: *see rfc 4944
@@ -156,7 +156,7 @@ void finalize_frag()
     //DESTRUCT_IP_BUFFER(IPv6_buf)
 }
 
-///take's a buffer and it's size and use it as output buffer
+///takes a buffer and it's size and uses it as output buffer
 ///args:: buf: pointer to buffer
 ///       len: size of buffer (valid part if buffer is large)
 uint8_t setSendIPpacket(uint8_t* buf, uint16_t len);
@@ -174,9 +174,9 @@ uint8_t setSendIPpacket(uint8_t* buf, uint16_t len)
 }
 
 
-///cut's next frag from output buffer into next fragment. take *resFragLen
-///as maxumum expected frag size for next fragment. return 0 if extra fragments are 
-///remaining, 1 if fragmentation of current buffer is completed and 2 for error
+///cuts next frag from output buffer into next fragment. takes *resFragLen
+///as maximum expected frag size for next fragment. return 0 if extra fragments are 
+///remaining, 1 if fragmentation of current buffer is completed and 2 in case an error occures
 ///args:: resFragBuf: pointer to frag buffer
 ///       resFragLen: pointer variable containing the size of next frag
 ///                   after execution it wiil contain actual size of frag
@@ -193,7 +193,7 @@ uint8_t LoWPAN_nextFrag(uint8_t* resFragBuf, uint8_t* resFragLen)
     uint8_t fraglen = (*resFragLen);
     if(Sending_sent_offset == 0)
     {
-       if(Sending_length <= (*resFragLen)) //we dont need fragmentation
+       if(Sending_length <= (*resFragLen)) //we don't need fragmentation
        {
            memcpy(resFragBuf, Sending_buf, Sending_length);
            Sending_sent_offset = Sending_length;
@@ -275,13 +275,13 @@ uint8_t LoWPAN_nextFrag(uint8_t* resFragBuf, uint8_t* resFragLen)
 //6LoWPAN reassembling buffer and status info holder
 typedef struct
 {
-	//if this buffer is in use it should set to true
-	//and free buffer by setting it to false
+	//if this buffer is in use it should be set to true
+	//setting it to false frees the buffer
 	bool_t inUse;
 #ifndef FREEBSD
     clock_t timer;
 #endif // FREEBSD
-	//11-bit entier IP packet length before fragmentation
+	//11-bit length of the entire IP packet before fragmentation
 	uint16_t size;
 	//reassembled size
 	uint16_t ra_size;
@@ -292,14 +292,14 @@ typedef struct
 } LoWPAN_RA_info;
 
 
-///  for first fragment offset is zero
+///  for the first fragment, the offset is zero
 typedef struct
 {
 	//11-bit actual number stored here in a 16-bit uint
 	uint16_t size;
 	//datagram tag
 	uint16_t tag;
-	//datagram offset: this specify offset increments in multiples of eight
+	//datagram offset: this specifies the offset increments which are multiplied by eight
 	uint8_t offset;
 	//data payload len
 	uint8_t len;
@@ -334,7 +334,7 @@ typedef struct
                                 }while(0)
 #endif                                
 
-//reassembling buffers area : 2047B max size for each buffer
+//reassembling the buffers area : 2047B max size for each buffer
 //for now 10 buffer(s) simultaneously
 static LoWPAN_RA_info buffers_stack[STACK_BUFFERS_NUM];
 
@@ -361,8 +361,8 @@ void subsqFragScan(uint8_t* fragment, uint8_t len, LoWPAN_frag_t* resPack)
     memcpy(resPack->data, FRAGN_PAYLOAD_PTR(fragment), resPack->len);
 }
 
-///store's recieved fragmnet into given reassembling buffer
-///args:: RAbuf: pointer to reassembling buffer
+///stores the recieved fragment in the given reassembling buffer
+///args:: RAbuf: pointer to the reassembling buffer
 ///       frag: pointer to parsed fragment
 uint8_t storeFrag(LoWPAN_RA_info* RAbuf, LoWPAN_frag_t* frag);
 uint8_t storeFrag(LoWPAN_RA_info* RAbuf, LoWPAN_frag_t* frag)
@@ -381,7 +381,7 @@ uint8_t storeFrag(LoWPAN_RA_info* RAbuf, LoWPAN_frag_t* frag)
     return 0;
 }
 
-///store a non fragmented packet into givn reassembling buffer
+///stores a non fragmented packet in the given reassembling buffer
 ///args:: RAbuf: pointer to reassembling buffer
 ///       buf: packet buffer
 ///       len: packet length
@@ -393,9 +393,9 @@ uint8_t storePack(LoWPAN_RA_info* RAbuf, uint8_t* buf, uint8_t len)
     return 1;
 }
 
-///find available reassembling buffer from RA-buf-pool and retur
-///pointer to it
-///arg:: tag: tag of recieved fragment, it should not be zero
+///find available reassembling buffer from RA-buf-pool and return
+///the pointer which points to it
+///arg:: tag: tag of received fragment, it should not be zero
 LoWPAN_RA_info* getRAbuffer(uint16_t tag);
 LoWPAN_RA_info* getRAbuffer(uint16_t tag)
 {
@@ -427,8 +427,8 @@ LoWPAN_RA_info* getRAbuffer(uint16_t tag)
     return temp;
 }
 
-///find available reassembling buffer from RA-buf-pool and retur
-///pointer to it. this buffer is specially for not fragmented packets
+///find available reassembling buffer from RA-buf-pool and return
+///the pointer which points to it. this buffer is specially for "not fragmented" packets
 LoWPAN_RA_info* getRAbuffersp(void);
 LoWPAN_RA_info* getRAbuffersp()
 {
@@ -445,7 +445,7 @@ LoWPAN_RA_info* getRAbuffersp()
     return temp;
 }
 
-///take recieved packet and put it in it's right place
+///takes received packet and puts it in it's right place
 LoWPAN_RA_info* LoWPAN_FragRA(uint8_t* buf, uint8_t len);
 LoWPAN_RA_info* LoWPAN_FragRA(uint8_t* buf, uint8_t len)
 {
@@ -488,14 +488,14 @@ void copyReleaseRAbuffer(LoWPAN_RA_info* rabuf, uint8_t* resIPv6pack, uint16_t* 
     RA_BUFFER_DEALLOC(*rabuf);
 }
 
-///handle function for recieved packets. it will do every thing! you just need to call this
-///from outside. if recieved packet is the last part, the reassembled packet will be copied 
+///handle function for received packets. it will do every thing! you just need to call this
+///from outside. if the received packet is the last part, the reassembled packet will be copied 
 ///into resIPv6pack and the packet size into resIPv6len
-///args:: buf: recieved packet
-///       length: recieved packet length
-///       resIPv6pack: pointer to result buffer. it must be an allocated buffer. you can use 
-///                    CREATE_IP_BUFFER macro to allocat this buffer
-///       resIPv6len: pointer to variable appropriate for length of result buffer
+///args:: buf: received packet
+///       length: length of the received packet
+///       resIPv6pack: pointer to the result buffer. it must be an allocated buffer. you can use 
+///                    CREATE_IP_BUFFER macro to allocate this buffer
+///       resIPv6len: pointer to the variable which is appropriate for length of the result buffer
 uint8_t LoWPAN_savePacket(uint8_t* buf, uint8_t length, uint8_t* resIPv6pack, uint16_t* resIPv6len);
 uint8_t LoWPAN_savePacket(uint8_t* buf, uint8_t length, uint8_t* resIPv6pack, uint16_t* resIPv6len)
 {
