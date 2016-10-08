@@ -70,13 +70,13 @@
 ///////////////////////////////////////////////////////////////
 
 #if ARCHITECT == BIG_ENDIAN_ARC
-// set dest addr for struct MAC_Frame_t. two first aguments must be uint8_t*, and the last uint8_t
+// set dest addr for struct MAC_Frame_t. The first two aguments must be uint8_t*, and the last one must be uint8_t
 #define MAC_SET_ADDRESS(_ADDR_DST, _ADDR_SRC, _LEN) ({	for(int i = 0, j = _LEN - 1; i<_LEN; i++, j--){		\
 															_ADDR_DST[i] = _ADDR_SRC[j];	\
 														} })
 
 #elif ARCHITECT == LITTLE_ENDIAN_ARCH
-// set dest addr for struct MAC_Frame_t. two first aguments must be uint8_t*, and the last uint8_t
+// set dest addr for struct MAC_Frame_t. The first two aguments must be uint8_t*, and the last one must be uint8_t
 #define MAC_SET_ADDRESS(_ADDR_DST, _ADDR_SRC, _LEN) ({	for(int i = 0, j = _LEN - 1; i<_LEN; i++, j--){		\
 															_ADDR_DST[i] = _ADDR_SRC[j];	\
 														} })
@@ -86,7 +86,7 @@
 #endif
 
 ///////////////////////////////////////////////////////////////
-///  Struct definitions here //////////////////////////////////
+///  Here's where structs are defined //////////////////////////////////
 
 typedef enum MAC_Frame_Type_t{
 	BEACON = 0,
@@ -129,14 +129,14 @@ typedef struct {
 #define MAC_MAX_LENGTH 124
 #define MAC_MAX_PAYLOAD_LENGTH (MAC_MAX_LENGTH - 5)
 typedef struct {
-	// Payload length; it should be calculated based on mac header length
+	// Payload length; it should be calculated based on the mac header length
 	uint8_t length;
 	//frame control field
 	MAC_FCF_t FCF;
 	uint8_t SequenceNumber;
 	uint16_t DestPANID;
-	// we assume least significant byte is in adder with index of 0
-	// this means that addr must be stored little-endian
+	// we assume that the least significant byte is stored in the adder with the index of 0
+	// this means that addr must be stored in a little-endian order
 	uint8_t DestAddr[8];
 	uint16_t SrcPANID;
 	uint8_t SrcAddr[8];
@@ -146,7 +146,7 @@ typedef struct {
 
 
 ///////////////////////////////////////////////////////////////
-///  Variable definitions here ////////////////////////////////
+///  Here's where the variables are defined ////////////////////////////////
 
 //static MAC_Frame_t* output_frame;
 //static MAC_Frame_t* input_frame;
@@ -155,7 +155,7 @@ typedef struct {
 ///   Functions implementations ///////////////////////////////
 
 
-///take's MAC_Frame_t struct and calculates MAC header length
+///takes a MAC_Frame_t struct and calculates the MAC header length
 ///arg:: f: MAC_Frame_t struct filled with valid data
 uint8_t MACgethdrLen(MAC_Frame_t f);
 uint8_t MACgethdrLen(MAC_Frame_t f)
@@ -196,7 +196,7 @@ uint8_t MACgethdrLen(MAC_Frame_t f)
 }
 
 
-///take's MAC_Frame_t struct and according to MAC header length calculates MAC payload length
+///take's MAC_Frame_t struct and calculates the MAC payload length according to the MAC header length 
 ///arg:: f: MAC_Frame_t struct filled with valid data
 uint8_t MACgetPayloadLength(MAC_Frame_t f);
 uint8_t MACgetPayloadLength(MAC_Frame_t f)
@@ -205,8 +205,8 @@ uint8_t MACgetPayloadLength(MAC_Frame_t f)
 }
 
 
-///take's 16bits FCF field and extracts it's data into a MAC_FCF_t struct
-///this struct should be provided before, function just get a pointer
+///takes a 16bits FCF field and extracts it's data into a MAC_FCF_t struct
+///this struct should be provided before, function just gets a pointer
 ///args:: FCF_field: 2B FCF field of MAC frame
 void MACfcfparser(uint16_t FCF_field, MAC_FCF_t* FCF_result);
 void MACfcfparser(uint16_t FCF_field, MAC_FCF_t* FCF_result)
@@ -265,9 +265,9 @@ void MACfcfparser(uint16_t FCF_field, MAC_FCF_t* FCF_result)
 	}
 }
 
-///takes a MAC frame and parse's it into MAC_Frame_t struct
-///args:: buffer: pointer to recived MAC frame
-///       len: is mac frame length in bytes without considering FCS and frame length fields
+///takes a MAC frame and parses it into MAC_Frame_t struct
+///args:: buffer: pointer to the received MAC frame
+///       len: is the mac frame length in bytes without considering the FCS and frame length fields
 ///       frame: parsed frame will take place in this struct as result
 void MACframeparser(uint8_t* buffer, uint8_t len, MAC_Frame_t* frame);
 void MACframeparser(uint8_t* buffer, uint8_t len, MAC_Frame_t* frame)
@@ -344,8 +344,8 @@ void MACframeparser(uint8_t* buffer, uint8_t len, MAC_Frame_t* frame)
     memcpy(frame->Payload, &buffer[h], frame->length);
 }
 
-///takes MAC_FCF_t struct containing FCF data and converts it to 2B FCF Field
-///args:: FCF_data: pointer to a MAC_FCF_t struct
+///takes a MAC_FCF_t struct containing FCF data and converts it to 2B FCF Field
+///args:: FCF_data: pointer to the MAC_FCF_t struct
 ///       FCF_result: the 2B FCF field will take place here
 void MACfcfgenerate(MAC_FCF_t* FCF_data, uint16_t* FCF_result);
 void MACfcfgenerate(MAC_FCF_t* FCF_data, uint16_t* FCF_result)
@@ -402,8 +402,8 @@ void MACfcfgenerate(MAC_FCF_t* FCF_data, uint16_t* FCF_result)
 }
 
 ///takes a MAC_Frame_t struct and converts it to MAC standard frame
-///args:: frame: MAC_Frame_t struct containing MAC frame data
-///       buffer: pointer to reault frame buffer
+///args:: frame: MAC_Frame_t struct which contains the MAC frame data
+///       buffer: pointer to the reault frame buffer
 ///       len: result data length in buffer
 void MACframecreate(MAC_Frame_t* frame, uint8_t* buffer, uint8_t* len);
 void MACframecreate(MAC_Frame_t* frame, uint8_t* buffer, uint8_t* len)
@@ -540,10 +540,10 @@ void init_framer()
 }
 
 
-///takes pointer to output buffer and pointer to it's size
+///takes a pointer to output buffer and a pointer to it's size
 ///args:: _buffer: pointer to output buffer, generated frame will be placed here
 ///       _len: pointer to the variable containing maximum size of frame that is expected from MAC layer
-///             after execution this will contain actual size of generated frame
+///             after execution this will contain actual size of the generated frame
 #define framerOut802154(_buffer, _len) ({ FrameOut.FCF.RSVD = 0;																\
 									   FrameOut.SequenceNumber = (FrameOut.SequenceNumber % 254) + 1;						\
 									   if(FrameOut.DestPANID == FrameOut.SrcPANID) FrameOut.FCF.PanIDCompression = TRUE;	\
@@ -554,24 +554,24 @@ void init_framer()
 #define asDataFrame802154 ({FrameOut.FCF.FrameType = DATA;})
 #define asAcknowledgementFrame802154 ({FrameOut.FCF.FrameType = ACKNOWLEDGEMENT;})
 #define asCommandFrame802154 ({FrameOut.FCF.FrameType = MAC_COMMAND;})
-//frame pending state can be detemined by calling these macros respectively
+//frame pending state can be determined by calling these macros respectively
 #define framePending802154 ({ FrameOut.FCF.FramePend = TRUE; })
 #define NoFramePending802154 ({ FrameOut.FCF.FramePend = FALSE; })
 //ACK request state can be detemined by calling these macros respectively
 #define AckRequest802154 ({FrameOut.FCF.AckRequset = TRUE;})
 #define NoAckRequest802154 ({FrameOut.FCF.AckRequset = FALSE;})
-///take's pointer to 64byte memory containing address. it can be short address peaded with zero's
+///takes a pointer to 64byte memory which contains the address. it can also be short address with zeros added to its end
 ///arg's:: _addr: pointer(uint8_t*) to 64byte address array
 #define setSrcAddr802154(_addr) (MAC_SET_ADDRESS(FrameOut.SrcAddr, _addr, 8))
 #define setDestAddr802154(_addr) (MAC_SET_ADDRESS(FrameOut.DestAddr, _addr, 8))
 //addresses are accessible with these macros
 #define srcAddr802154 (FrameOut.SrcAddr)
 #define destAddr802154 (FrameOut.DestAddr)
-///sets PAN ID's given by 16bit uint16_t variable _ID
+///sets PAN IDs which are given to it by a 16bit uint16_t variable _ID
 ///arg's:: _ID: uint16_t PAN ID
 #define srcPanID(_ID) (FrameOut.SrcPANID = _ID)
 #define destPanID(_ID) (FrameOut.DestPANID = _ID)
-//with this macro you can access maximum payload length available for MAC layer
+//with this macro you can access maximum payload length which is available for MAC layer
 #define maxPayload802154 (MACgetPayloadLength(FrameOut))
 //access output frame payload
 #define data802154 (FrameOut.Payload)
@@ -579,9 +579,9 @@ void init_framer()
 #define dataLen802154 (FrameOut.length)
 
 
-///takes pointer input frame and it's length
-///args:: _buffer: pointer(uint8_t*) to received frame
-///       _len: lenght of received frame with type of uint8_t
+///takes a pointer input frame and it's length as arguments
+///args:: _buffer: pointer(uint8_t*) to the received frame
+///       _len: lenght of received frame which is a uint8_t type
 #define framerIn802154(_buffer, _len) ({ MACframeparser(_buffer, _len, &FrameIn); })
 /////last input frame/////////
 //frame type can be determined by calling ecah of these macros respectively
@@ -589,9 +589,9 @@ void init_framer()
 #define lifIsDataFrame802154 (FrameIn.FCF.FrameType == DATA)
 #define lifIsAcknowledgementFrame802154 (FrameIn.FCF.FrameType == ACKNOWLEDGEMENT)
 #define lifIsCommandFrame802154 (FrameIn.FCF.FrameType == MAC_COMMAND)
-//frame pending state can be detemined by calling this macro
+//frame pending state can be determined by calling this macro
 #define lifframePending802154 (FrameIn.FCF.FramePend == TRUE)
-//ACK request state can be detemined by calling these macros
+//ACK request state can be determined by calling these macros
 #define lifAckRequest802154 (FrameIn.FCF.AckRequset == TRUE)
 #define lifNoAckRequest802154 ({FrameOut.FCF.AckRequset == FALSE)
 //addresses are accessible with these macros
@@ -600,7 +600,7 @@ void init_framer()
 //PAN IDs are accessible by these macros respectively
 #define lifsrcPanID (FrameIn.SrcPANID)
 #define lifdestPanID (FrameOut.DestPANID)
-//with this macro you can access maximum payload length available for received frame
+//with this macro you can access maximum payload length which is available for the received frame
 #define lifmaxPayload802154 (MACgetPayloadLength(FrameIn))
 //access input frame payload
 #define lifdata802154 (FrameIn.Payload)
